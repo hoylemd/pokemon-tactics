@@ -9,16 +9,11 @@ var POKE_technique = function (spriteManager, projectile_manager) {
 		var fire_point = null;
 		var texture = that.proj_texture;
 
-		// make attack rolls
-		roll = Math.d100();
-		dodge = that.target.dodgeRoll();
-		hit = roll + that.hit_bonus > 50 + dodge;
-
 		// make projectile
 		sprite = new spriteManager.Sprite(texture, {x: 1, y: 1}, 0);
 		fire_point = {x: that.owner.position.x, y: that.owner.position.y};
 		new projectile_manager.Projectile(
-			sprite, fire_point, that.target, hit, that);
+			sprite, fire_point, that.target, that);
 	};
 
 	// prototype
