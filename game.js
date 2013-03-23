@@ -26,6 +26,7 @@ var ISIS_Engine = function (canvas, io) {
 		ISIS.SpriteManager = ISIS_SpriteManager(canvas);
 		ISIS.ParticleManager = ISIS_ParticleManager();
 		ISIS.ProjectileManager = ISIS_ProjectileManager();
+		ISIS.PokemonManager = POKE_PokemonManager(canvas, content);
 		ISIS.GameState = ISIS_gameState(this, io, canvas, content);
 		ISIS.BattleState = POKE_battleState();
 
