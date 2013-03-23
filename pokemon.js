@@ -48,13 +48,19 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		// arbitrary movement method
 		moveTo : function (position) {
 			var bar_y = 0;
-			// snap to the grid
-			this.position = snapToGrid(position);
+
+			this.position = position;
 
 			// move the sprites
 			this.sprite.centerOn(this.position);
 			bar_y = (this.position.y + 0.5 * this.sprite.frameDims.y) - 15;
 			this.health_bar.centerOn({x: this.position.x, y: bar_y });
+		},
+
+		move : function (displacement) {
+			var newPos = {x: this.position.x + displacement.x,
+				y: this.position.y + displacement.y};
+			this.moveTo(newPos);
 		},
 
 		// arbtrary rotation function
@@ -79,17 +85,12 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 				context.lineWidth = 1;
 				context.strokeStyle = order.colour;
 
-				// draw the line
-				if (order.pending ) {
-					context.dashedLineTo(this.position, order.position,
-						[20, 20]);
-				} else {
-					context.moveTo(this.position.x ,this.position.y);
-					context.lineTo(order.position.x, order.position.y);
-				}
+				context.moveTo(this.position.x ,this.position.y);
+				context.lineTo(order.position.x, order.position.y);
 				context.stroke();
 			}
 		},
+
 
 		// technique registration
 		addTechnique : function (technique) {
@@ -102,19 +103,17 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		},
 
 		// Hull manipulation
-		setHull : function (hull) {
-			this.hullMax = hull;
-			this.hullCurrent = hull;
+		setHull : function (HP) {
+			this.HPMax = HP;
+			this.HPCurrent = HP;
 		},
 
 		// order registration
 		registerOrder : function (order) {
-			if (order.name === "attack") {
-				order.x = order.target.x;
-				order.y = order.target.y;
-				order.owner = this;
-				this.orders.attack = order;
-			}
+			order.x = order.target.x;
+			order.y = order.target.y;
+			order.owner = this;
+			this.orders[order.name] = order;
 		},
 
 		// carry out orders function
@@ -122,28 +121,30 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 			var attack = this.orders.attack;
 
 			// attack order
-			if (attack) {
-				if (attack.pending) {
-					if (this.technique) {
-						this.technique.setTarget(attack.target);
-						attack.pending = false;
-					} else {
-						console.log(this.name +
-							" has no technique! It cannot attack!");
-						this.orders.attack = null;
+			if (this.technique) {
+				if (attack) {
+					if (attack.pending) {
+						if (this.technique) {
+							this.technique.setTarget(attack.target);
+							attack.pending = false;
+						} else {
+							console.log(this.name +
+								" has no technique! It cannot attack!");
+							this.orders.attack = null;
+						}
 					}
+				} else {
+					this.technique.setTarget(null);
 				}
-			} else {
-				this.technique.setTarget(null);
-			}
+				}
 		},
 
 		// damage pokemon
 		takeDamage : function (amount, position) {
-			this.hullCurrent -= amount;
+			this.HPCurrent -= amount;
 
 			// check if the pokemon is fainted
-			if (this.hullCurrent <= 0) {
+			if (this.HPCurrent <= 0) {
 				faint(this);
 			}
 		},
@@ -155,13 +156,9 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 
 		// point collision function
 		collide : function(point) {
-			var dx = point.x - (this.position.x - (tileSize / 2));
-			var dy = point.y - (this.position.y - (tileSize / 2));
+			var distance = Math.abs(Math.calculateDistancePoints(this.position, point));
 
-			var collision = ((dx > 0 && dx < tileSize) &&
-				(dy > 0 && dy < tileSize)) && !this.destroyed;
-
-			return collision;
+			return distance <= 35;
 
 		},
 
@@ -173,13 +170,32 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		// update function
 		update : function (elapsed_ms) {
 			// update children
-			this.technique.update(elapsed_ms);
-			this.health_bar.value = this.hullCurrent / this.hullMax;
+			if (this.technique) {
+				this.technique.update(elapsed_ms);
+			}
+			this.health_bar.value = this.HPCurrent / this.HPMax;
 
 			// check if attack order is still valid
 			if (this.orders.attack) {
 				if (this.orders.attack.target.destroyed) {
 					delete this.orders.attack;
+				}
+			}
+
+			// move order
+			if (this.orders.move) {
+				// shorthand some stuff
+				var order = this.orders.move;
+				var distance = Math.calculateDistancePoints(this.position, order.target);
+
+				// execute the movement
+				if (this.position === orders.target) {
+					delete this.orders.move;
+				} else if (distance < this.speed) {
+					this.moveTo(order.target);
+					delete this.orders.move;
+				} else {
+					this.move(Math.multVector(order.vector, this.speed));
 				}
 			}
 
@@ -227,8 +243,9 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 
 		// combat stats
 		this.orders = {};
-		this.hullMax = 5;
-		this.hullCurrent = 5;
+		this.HPMax = 5;
+		this.HPCurrent = 5;
+		this.speed = 10;
 		this.dodgeBonus = 10;
 		this.technique = null;
 		this.destroyed = false
