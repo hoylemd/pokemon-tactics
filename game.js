@@ -13,25 +13,13 @@ var ISIS_Engine = function (canvas, io) {
 
 	// image manifest
 	var image_manifest = {
-		"spaceTile" : {id: "spaceTile", path : "space.png", loaded: false},
 		"ArkadianCruiser" : {id: "ArkadianCruiser", path: "ark-cru.png",
 			loaded: false},
 		"TerranCruiser" : {id: "TerranCruiser", path: "ter-cru.png",
 			loaded: false},
-		"MoveButton" : {id: "MoveButton", path: "MoveButton.png",
-			loaded: false},
-		"MoveButtonPressed" : {id: "MoveButtonPressed",
-			path: "MoveButtonPressed.png", loaded: false},
-		"GoButton" : {id: "GoButton", path: "GoButton.png", loaded: false},
-		"AttackButton" : {id: "AttackButton", path: "AttackButton.png",
-			loaded: false},
-		"AttackButtonPressed" : {id: "AttackButtonPressed",
-			path: "AttackButtonPressed.png", loaded: false},
 		"bullet" : {id: "bullet", path: "bullet.png", loaded: false},
-		"debris1" : {id: "debris1", path: "debris1.png", loaded: false},
-		"debris2" : {id: "debris2", path: "debris2.png", loaded: false},
-		"debris3" : {id: "debris3", path: "debris3.png", loaded: false}
-	};
+		"field" : {id: "field", path: "field.png", loaded: false}
+	}
 
 	// function to initialize the game
 	this.initialize = function () {
