@@ -102,8 +102,8 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 			}
 		},
 
-		// Hull manipulation
-		setHull : function (HP) {
+		// HP manipulation
+		setHP : function (HP) {
 			this.HPMax = HP;
 			this.HPCurrent = HP;
 		},
