@@ -71,6 +71,15 @@ var POKE_PokemonManager = function (canvas, content) {
 				context.lineTo(order.position.x, order.position.y);
 				context.stroke();
 			}
+
+			// draw the range circle
+			context.reset();
+			context.beginPath();
+			context.strokeStyle = "red";
+			context.arc(this.position.x, this.position.y, this.technique.range,
+				0, Math.TAU, true);
+			context.closePath();
+			context.stroke();
 		},
 
 
@@ -138,7 +147,7 @@ var POKE_PokemonManager = function (canvas, content) {
 
 		// point collision function
 		collide : function(point) {
-			var distance = Math.abs(Math.calculateDistancePoints(this.position, point));
+			var distance = Math.abs(Math.calcDistancePoints(this.position, point));
 
 			return distance <= 35 && !this.fainted;
 
@@ -168,7 +177,7 @@ var POKE_PokemonManager = function (canvas, content) {
 			if (this.orders.move) {
 				// shorthand some stuff
 				var order = this.orders.move;
-				var distance = Math.calculateDistancePoints(this.position, order.target);
+				var distance = Math.calcDistancePoints(this.position, order.target);
 
 				// execute the movement
 				if (this.position === orders.target) {
