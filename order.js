@@ -1,7 +1,7 @@
 // Orders object file
 
 // Builder function for orders factory object
-var ISIS_order = function(){
+var POKE_order = function(){
 	// Order class prototype (hidden)
 	var order_prototype = {
 	};
@@ -26,7 +26,32 @@ var ISIS_order = function(){
 				// set it as pending
 				this.pending = true;
 			} else {
-				console.log("Attack order created without or source.");
+				throw "Attack order created without target or source.";
+			}
+		},
+
+		Move: function(source, target) {
+			// add the target and source
+			if (source && target) {
+				// build the prototype
+				this.__proto__ = order_prototype;
+
+				// add cosmetics
+				this.name = "move";
+				this.colour = "#00CC00";
+
+				// add affected parties
+				this.source = source;
+				this.target = target;
+				this.position = target;
+
+				// calculate the unit vector
+				this.vector = Math.calcVector(source.position, target);
+
+				// set it as pending
+				this.pending = true;
+			} else {
+				throw "Move order created without target or source.";
 			}
 		}
 	};
