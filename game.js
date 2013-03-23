@@ -13,10 +13,8 @@ var ISIS_Engine = function (canvas, io) {
 
 	// image manifest
 	var image_manifest = {
-		"ArkadianCruiser" : {id: "ArkadianCruiser", path: "ark-cru.png",
-			loaded: false},
-		"TerranCruiser" : {id: "TerranCruiser", path: "ter-cru.png",
-			loaded: false},
+		"metagross" : {id: "metagross", path: "376.png", loaded: false},
+		"blastoise" : {id: "blastoise", path: "9.png", loaded: false},
 		"bullet" : {id: "bullet", path: "bullet.png", loaded: false},
 		"field" : {id: "field", path: "field.png", loaded: false}
 	}
@@ -29,7 +27,7 @@ var ISIS_Engine = function (canvas, io) {
 		ISIS.ParticleManager = ISIS_ParticleManager();
 		ISIS.ProjectileManager = ISIS_ProjectileManager();
 		ISIS.GameState = ISIS_gameState(this, io, canvas, content);
-		ISIS.BattleState = ISIS_battleState();
+		ISIS.BattleState = POKE_battleState();
 
 		current_state = new ISIS.BattleState();
 		current_state.initialize();
