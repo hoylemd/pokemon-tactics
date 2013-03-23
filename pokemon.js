@@ -1,42 +1,25 @@
 // Pokemon object (unmanaged)
-var POKE_pokemon = function (context, content, spriteManager, particle_manager) {
+var POKE_PokemonManager = function (canvas, content) {
+	// get the context
+	var context = canvas.getContext("2d");
+
 	// check the params
 	if (!context) {
 		throw "no context given to Pokemon class constructor";
 	} else if (!content) {
 		throw "no content given to Pokemon class constructor";
-	} else if (!spriteManager) {
-		throw "no sprite manager given to Pokemon class constructor";
-	} else if (!particle_manager) {
-		throw "no particle manager given to Pokemon class constructor";
 	}
 
-	// tile constant
-	var tileSize = 100;
-
-	// function to snap coordinates to the grid
-	var snapToGrid = function(position) {
-		// calculate offset
-		var xOff = position.x % tileSize;
-		var yOff = position.y % tileSize;
-
-		// return new coords
-		return {
-			x: position.x - xOff + (tileSize / 2),
-			y: position.y - yOff + (tileSize / 2)
-		};
-	}
-
-	// function for when the pokemon is destroyed
+	// function for when the pokemon is fainted
 	var faint =  function (that) {
 		// turn the pokemon sprite into debris
-		new particle_manager.Debris(that.sprite);
+		new that.manager.particle_manager.Debris(that.sprite);
 
-		console.log("Unit " + that.name + " destroyed!");
+		console.log("Unit " + that.name + " fainted!");
 
 		// destroy stuff
 		that.health_bar.dispose();
-		that.destroyed = true;
+		that.fainted = true;
 
 		// clear orders
 		that.orders.attack = null;
@@ -71,7 +54,6 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		// order line drawing method
 		drawLines: function() {
 			// calculate tile offset
-			var tileOffset = tileSize / 2;
 			var index = 0;
 			var order = null;
 
@@ -140,7 +122,7 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		},
 
 		// damage pokemon
-		takeDamage : function (amount, position) {
+		takeDamage : function (amount) {
 			this.HPCurrent -= amount;
 
 			// check if the pokemon is fainted
@@ -158,7 +140,7 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		collide : function(point) {
 			var distance = Math.abs(Math.calculateDistancePoints(this.position, point));
 
-			return distance <= 35;
+			return distance <= 35 && !this.fainted;
 
 		},
 
@@ -177,7 +159,7 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 
 			// check if attack order is still valid
 			if (this.orders.attack) {
-				if (this.orders.attack.target.destroyed) {
+				if (this.orders.attack.target.fainted) {
 					delete this.orders.attack;
 				}
 			}
@@ -219,36 +201,68 @@ var POKE_pokemon = function (context, content, spriteManager, particle_manager) 
 		}
 	}
 
-	// constructor
-	return function(texture, mapDims, msBetweenFrames) {
-		// prepare sprites
-		var sprite = new spriteManager.Sprite(
-			(content[texture]), mapDims, msBetweenFrames);
-		var health_bar_dims = {x: sprite.frameDims.x * 0.8, y: 10};
-		var health_bar = new spriteManager.BarSprite(health_bar_dims,
-			"green", "red", "yellow", 0.2);
+	// Pokemon constructor constructor
+	pokemonConstructor = function (manager) {
+		return function(texture, mapDims, msBetweenFrames) {
 
-		// build the object
-		this.__proto__ = pokemon_prototype;
+			// prepare sprites
+			var sprite = new manager.sprite_manager.Sprite(
+				content.images[texture], mapDims, msBetweenFrames);
+			var health_bar_dims = {x: sprite.frameDims.x * 0.8, y: 10};
+			var health_bar = new manager.sprite_manager.BarSprite(health_bar_dims,
+				"green", "red", "yellow", 0.2);
 
-		// sprites
-		this.sprite= sprite;
-		this.health_bar = health_bar;
+			// build the object
+			this.__proto__ = pokemon_prototype;
 
-		// general stuff
-		this.name= "Unnamed Unit";
-		this.position = sprite.position;
-		this.rotation = sprite.rotation;
-		this.fleetView = null;
+			// link to the manager
+			this.manager = manager;
 
-		// combat stats
-		this.orders = {};
-		this.HPMax = 5;
-		this.HPCurrent = 5;
-		this.speed = 10;
-		this.dodgeBonus = 10;
-		this.technique = null;
-		this.destroyed = false
+			// sprites
+			this.sprite= sprite;
+			this.health_bar = health_bar;
 
-	}
+			// general stuff
+			this.name= "Unnamed Unit";
+			this.position = sprite.position;
+			this.rotation = sprite.rotation;
+
+			// combat stats
+			this.orders = {};
+			this.HPMax = 5;
+			this.HPCurrent = 5;
+			this.speed = 10;
+			this.dodgeBonus = 10;
+			this.technique = null;
+			this.fainted = false
+
+			// add to the manager
+			manager.add(this);
+
+		};
+	};
+
+	var checkCollisions = function (point) {
+		var colliders = [];
+		for (var i in this.object_list) {
+			var current = this.object_list[i];
+			if (current.collide && current.collide(point)) {
+				colliders.push(current);
+			}
+		}
+
+		return colliders;
+	};
+
+	return function (spriteManager, particle_manager){
+		this.__proto__ = new ISIS.Manager();
+		this.type_proto = pokemon_prototype;
+		this.sprite_manager = spriteManager;
+		this.particle_manager = particle_manager;
+
+		this.checkForCollisions = checkCollisions;
+		this.Pokemon = pokemonConstructor(this);
+
+		this.canvas = canvas;
+	};
 }
