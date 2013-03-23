@@ -62,13 +62,19 @@ var POKE_battleState = function () {
 				this.initialize();
 			}
 
-			// draw the UI
+			// update players
+			player.update(elapsed);
+			enemy.update(elapsed);
+
+			// draw the background
 			this.context.reset();
 			this.context.drawImage(images["field"], 0, 0);
 
 			// call the base updater (updates all components
 			this.__proto__.update.call(this, elapsed);
 
+			// draw the UI
+			player.drawLines();
 		};
 
 		// click handers
@@ -97,6 +103,8 @@ var POKE_battleState = function () {
 			images,
 			this.sprite_manager,
 			particle_manager);
+		// orders objects
+		orders = POKE_order();
 
 		// main click handler
 		clickHandler = ( function (that) {
@@ -104,6 +112,16 @@ var POKE_battleState = function () {
 				// get the mouse position
 				var mousePos = that.io.getMousePos(that.canvas, evt);
 
+				console.log("player collide: " + player.collide(mousePos));
+				console.log("enemy collide: " + enemy.collide(mousePos));
+
+				if (enemy.collide(mousePos)) {
+					player.registerOrder(new orders.Attack(player, enemy));
+				} else {
+					player.registerOrder(new orders.Move(player, mousePos));
+				}
+
+				// player.carryOut();
 				// handle based on position
 			};
 		} )(this);
