@@ -4,7 +4,7 @@ function ISIS_ProjectileManager () {
 
 	// function to spawn the hit text sprite
 	var spawnHitText = function (that) {
-		var hitText = "" + (that.hit ? that.weapon.damage : "Miss");
+		var hitText = "" + (that.hit ? that.technique.damage : "Miss");
 		var sprite = new that.manager.sprite_manager.TextSprite(
 			hitText, "14pt Courier", "#888888");
 		sprite.centerOn(that.position);
@@ -18,7 +18,7 @@ function ISIS_ProjectileManager () {
 		that.sprite.move(that.displacement);
 		that.position = that.sprite.position;
 
-		if (that.target.fleetView.boundSprite(that.sprite)) {
+		if (that.manager.sprite_manager.canvas.boundSprite(that)) {
 			return updateMissed;
 		} else {
 			that.dispose();
@@ -30,13 +30,13 @@ function ISIS_ProjectileManager () {
 	var transitionCollision = function (that) {
 		spawnHitText(that);
 		if (that.hit) {
-			console.log(that.weapon.name  +" hits " + that.target.name +
-				" for " + that.weapon.damage + " points of damage");
-			that.target.takeDamage(that.weapon.damage, that.position);
+			console.log(that.technique.name  +" hits " + that.target.name +
+				" for " + that.technique.damage + " points of damage");
+			that.target.takeDamage(that.technique.damage, that.position);
 			that.dispose();
 			return null;
 		} else {
-			console.log(that.weapon.name + " misses " + that.target.name);
+			console.log(that.technique.name + " misses " + that.target.name);
 			return updateMissed;
 		}
 	};
@@ -53,61 +53,9 @@ function ISIS_ProjectileManager () {
 		}
 	};
 
-	// prepare the transition from in-transit to incoming
-	var transitionIncoming = function (that) {
-		var randY = that.targetView.position.y +
-			Math.random() * that.targetView.dimensions.y;
-		var initX = that.targetView.position.x;
-		var spawn_point = null;
-		var vector = null;
-
-		if (that.displacement.x < 0) {
-			initX += that.targetView.dimensions.x;
-		}
-
-		spawn_point = {x: initX, y: randY};
-
-		that.sprite.hidden = false;
-		that.sprite.moveTo(spawn_point);
-
-		vector = Math.calcVector(spawn_point, that.target.position);
-
-		vector.x *= that.weapon.proj_speed;
-		vector.y *= that.weapon.proj_speed;
-		that.displacement = vector;
-
-		that.sprite.rotation = Math.calcVectorAngle(vector);
-
-		return updateIncoming;
-	};
-
-	// update function for when the projectile is in transit between fleets
-	var updateInTransit = function (that) {
-		that.distance -= that.weapon.proj_speed;
-
-		if (that.distance > 0) {
-			return updateInTransit;
-		} else {
-			return transitionIncoming(that);
-		}
-	};
-
-	// update function for when the projectile is leaving it's parent
-	var updateOutgoing = function (that) {
-		that.sprite.move(that.displacement);
-		that.position = that.sprite.position;
-
-		if (that.owner.fleetView.boundSprite(that.sprite)) {
-			return updateOutgoing;
-		} else {
-			that.sprite.hidden = true;
-			return updateInTransit;
-		}
-	};
-
 	// encapsulated prototype
 	var projectile_prototype = {
-		currentUpdate : updateOutgoing,
+		currentUpdate : updateIncoming,
 		update : function (elapsed) {
 			if (this.currentUpdate) {
 				this.currentUpdate = this.currentUpdate(this);
@@ -126,9 +74,9 @@ function ISIS_ProjectileManager () {
 
 	// Constructor constructor
 	var projectileConstructor = function (manager) {
-		return function (sprite, origin, target, hit, weapon) {
+		return function (sprite, origin, target, hit, technique) {
 			// chack the args
-			if (sprite && origin && target && weapon) {
+			if (sprite && origin && target && technique) {
 				// prototype it
 				this.__proto__ = projectile_prototype;
 				this.manager = manager;
@@ -137,8 +85,8 @@ function ISIS_ProjectileManager () {
 				this.sprite = sprite;
 				this.target = target;
 				this.hit = hit ? true : false;
-				this.weapon = weapon;
-				this.owner = weapon.owner;
+				this.technique = technique;
+				this.owner = technique.owner;
 
 				manager.add(this);
 
@@ -146,14 +94,11 @@ function ISIS_ProjectileManager () {
 				sprite.centerOn(origin);
 				this.position = sprite.position;
 				this.distance = 3000;
-				this.targetView = target.fleetView;
-				sprite.rotation = weapon.owner.rotation;
+				sprite.rotation = technique.owner.rotation;
 
 				// calculate vectors
-				var vector = Math.calcAngleVector(weapon.owner.rotation);
-				vector.x *= weapon.proj_speed;
-				vector.y *= weapon.proj_speed;
-				this.displacement = vector;
+				var vector = Math.calcVector(technique.owner.position, target.position);
+				this.displacement = Math.multVector(vector, technique.proj_speed);
 
 			} else {
 				// error on bad args
