@@ -91,8 +91,6 @@ var POKE_battleState = function () {
 				this.initialize();
 			}
 
-			enemy.AI();
-
 			// draw the background
 			this.context.reset();
 			this.context.drawImage(images["field"], 0, 0);
