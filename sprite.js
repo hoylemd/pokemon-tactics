@@ -272,10 +272,7 @@ function ISIS_SpriteManager (canvas) {
 					sprite.update(elapsed);
 
 					// set the external flag for sprites who leave the canvas
-					if (sprite.position.x > canvas.width ||
-						sprite.position.x < 0 ||
-						sprite.position.y > canvas.height ||
-						sprite.position.y < 0) {
+					if (!canvas.boundSprite(sprite)) {
 						sprite.external = true;
 					} else {
 						sprite.external = false;
