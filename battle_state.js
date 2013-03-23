@@ -38,9 +38,15 @@ var POKE_battleState = function () {
 
 			player = new Pokemon("metagross", {x: 1, y: 1}, 0);
 			player.moveTo({x: 300, y: 300});
+			player.setHP(150);
+
+
+			player.addTechnique(new Technique("Psybeam", 50, 100, 1500,
+				images["bullet"], 15));
 
 			enemy = new Pokemon("blastoise", {x: 1, y: 1}, 0);
 			enemy.moveTo({x: 800, y: 300});
+			enemy.setHP(200);
 
 			// call base initializer
 			this.__proto__.initialize.call(this);
@@ -78,7 +84,7 @@ var POKE_battleState = function () {
 		};
 
 		// click handers
-		var clickHander = null;
+		var clickHandler = null;
 
 		// disposer
 		var dispose = null;
@@ -98,7 +104,7 @@ var POKE_battleState = function () {
 
 		// set up classes
 		Technique = POKE_technique(this.sprite_manager,
-			particle_manager);
+			projectile_manager);
 		Pokemon = POKE_pokemon(this.context,
 			images,
 			this.sprite_manager,
@@ -121,7 +127,7 @@ var POKE_battleState = function () {
 					player.registerOrder(new orders.Move(player, mousePos));
 				}
 
-				// player.carryOut();
+				player.carryOut();
 				// handle based on position
 			};
 		} )(this);
