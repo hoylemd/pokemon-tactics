@@ -21,7 +21,7 @@ var POKE_order = function(){
 				// add affected parties
 				this.source = source;
 				this.target = target;
-				this.position = target.position;
+				this.position = target;
 
 				// set it as pending
 				this.pending = true;
