@@ -6,11 +6,7 @@ var ISIS_battleState = function () {
 		// game state
 		var paused = false;
 
-		// fleet view objects
-		var playerFleetView = null;
-		var enemyFleetView = null;
-
-		// units
+		// pokemon
 		var player = null;
 		var enemy = null;
 
@@ -19,9 +15,7 @@ var ISIS_battleState = function () {
 		var projectile_manager = null;
 
 		// classes
-		var Weapon = null;
-		var Unit = null;
-		var orders = null;
+		var Pokemon = null;
 
 		// Bar data
 		var buttonWidth = 150;
@@ -42,8 +36,12 @@ var ISIS_battleState = function () {
 		var initialize = function() {
 			// call base initializer
 			this.__proto__.initialize.call(this);
-
 		};
+
+		var drawBackground = function (context) {
+			return function () {
+			};
+		}(this.context);
 
 		// function to update the state
 		var update = function (elapsed) {
@@ -68,6 +66,7 @@ var ISIS_battleState = function () {
 			this.__proto__.update.call(this, elapsed);
 
 			// draw the UI
+			this.context.drawImage(images["field"], 0, 0);
 		};
 
 		// click handers
