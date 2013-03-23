@@ -78,6 +78,10 @@ Math.calcVector = function (p1, p2) {
 Math.calcVectorAngle = function (vector) {
 	return Math.atan2(vector.x, -1 * vector.y);
 };
+Math.multVector = function (vector, magnitude) {
+	return {x: vector.x * magnitude,
+		y: vector.y * magnitude};
+};
 
 // Function to get the angle in radians between two points
 Math.calculateLineAngle = function (p1, p2) {
@@ -146,11 +150,11 @@ CanvasRenderingContext2D.prototype.dashedLineTo = function (p1, p2, pattern) {
 	var checkX = { thereYet: gt, cap: Math.min };
 	var checkY = { thereYet: gt, cap: Math.min };
 
-	if (p1.y - p2.y > 0) {
+	if (gt(p1.y, p2.y)) {
 		checkY.thereYet = lt;
 		checkY.cap = Math.max;
 	}
-	if (p1.x - p2.x > 0) {
+	if (gt(p1.x, p2.x)) {
 		checkX.thereYet = lt;
 		checkX.cap = Math.max;
 	}
