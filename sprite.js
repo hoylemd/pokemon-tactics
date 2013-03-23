@@ -169,7 +169,7 @@ function ISIS_SpriteManager (canvas) {
 
 				// set the draw method
 				this.draw = function () {
-					if (!this.hidden) {
+					if (!this.hidden && !this.external) {
 						adjustContext(this);
 						drawStandard(this);
 					}
@@ -271,14 +271,14 @@ function ISIS_SpriteManager (canvas) {
 				if (sprite) {
 					sprite.update(elapsed);
 
-					// remove sprites who leave the canvas
-					// TODO: this might not be the best idea.
+					// set the external flag for sprites who leave the canvas
 					if (sprite.position.x > canvas.width ||
 						sprite.position.x < 0 ||
 						sprite.position.y > canvas.height ||
 						sprite.position.y < 0) {
-						sprite.dispose();
-						sprite = null;
+						sprite.external = true;
+					} else {
+						sprite.external = false;
 					}
 				}
 			}
