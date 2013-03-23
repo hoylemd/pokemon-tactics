@@ -166,6 +166,11 @@ var POKE_PokemonManager = function (canvas, content) {
 			}
 			this.health_bar.value = this.HPCurrent / this.HPMax;
 
+			// run AI if it exists
+			if (this.AI) {
+				this.AI();
+			}
+
 			// check if attack order is still valid
 			if (this.orders.attack) {
 				if (this.orders.attack.target.fainted) {
