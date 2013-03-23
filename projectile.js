@@ -45,6 +45,9 @@ function ISIS_ProjectileManager () {
 		} else if (!that.manager.sprite_manager.canvas.boundSprite(that)) {
 			that.dispose();
 			return null;
+		} else if (Math.calcDistancePoints(that.origin, that.position) > that.range) {
+			that.dispose();
+			return null;
 		} else {
 			return updateIncoming;
 		}
@@ -71,9 +74,9 @@ function ISIS_ProjectileManager () {
 
 	// Constructor constructor
 	var projectileConstructor = function (manager) {
-		return function (sprite, origin, target, technique) {
+		return function (sprite, target, technique) {
 			// check the args
-			if (sprite && origin && target && technique) {
+			if (sprite && target && technique) {
 				// prototype it
 				this.__proto__ = projectile_prototype;
 				this.manager = manager;
@@ -88,7 +91,8 @@ function ISIS_ProjectileManager () {
 				manager.add(this);
 
 				// position the sprite
-				sprite.centerOn(origin);
+				this.origin = technique.owner.position;
+				sprite.centerOn(this.origin);
 				this.position = sprite.position;
 
 				// calculate vectors
@@ -96,9 +100,11 @@ function ISIS_ProjectileManager () {
 				this.displacement = Math.multVector(vector, technique.proj_speed);
 				sprite.rotation = Math.calcVectorAngle(vector);
 
+				this.range = technique.range;
+
 			} else {
 				// error on bad args
-				console.log("projectile is missing some arguments");
+				throw "projectile is missing some arguments";
 			}
 		};
 	};
