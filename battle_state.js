@@ -13,10 +13,10 @@ var POKE_battleState = function () {
 		// components
 		var particle_manager = null;
 		var projectile_manager = null;
+		var pokemon_manager = null;
 
 		// classes
 		var Technique = null;
-		var Pokemon = null;
 
 		// Bar data
 		var buttonWidth = 150;
@@ -36,7 +36,7 @@ var POKE_battleState = function () {
 		// function to initialize the game
 		var initialize = function() {
 
-			player = new Pokemon("metagross", {x: 1, y: 1}, 0);
+			player = new pokemon_manager.Pokemon("metagross", {x: 1, y: 1}, 0);
 			player.moveTo({x: 300, y: 300});
 			player.setHP(150);
 
@@ -44,12 +44,28 @@ var POKE_battleState = function () {
 			player.addTechnique(new Technique("Psybeam", 50, 100, 1500,
 				images["bullet"], 15));
 
-			enemy = new Pokemon("blastoise", {x: 1, y: 1}, 0);
+			enemy = new pokemon_manager.Pokemon("blastoise", {x: 1, y: 1}, 0);
 			enemy.moveTo({x: 800, y: 300});
 			enemy.setHP(200);
 
+			// add the enemy AI
+			enemy.AI = enemyAI(enemy);
+
 			// call base initializer
 			this.__proto__.initialize.call(this);
+		};
+
+
+		var enemyAI = function (poke) {
+			return function(elapsed) {
+				if (!poke.orders.move) {
+					if (poke.position.y > 150) {
+						poke.registerOrder(new orders.Move(poke, {x:800, y:100}));
+					} else {
+						poke.registerOrder(new orders.Move(poke, {x:800, y:500}));
+					}
+				}
+			};
 		};
 
 		// function to update the state
@@ -68,9 +84,7 @@ var POKE_battleState = function () {
 				this.initialize();
 			}
 
-			// update players
-			player.update(elapsed);
-			enemy.update(elapsed);
+			enemy.AI();
 
 			// draw the background
 			this.context.reset();
@@ -85,6 +99,7 @@ var POKE_battleState = function () {
 
 		// click handers
 		var clickHandler = null;
+		var rightClickHandler = null;
 
 		// disposer
 		var dispose = null;
@@ -97,41 +112,53 @@ var POKE_battleState = function () {
 
 		// set up components
 		particle_manager = new ISIS.ParticleManager();
+		pokemon_manager = new ISIS.PokemonManager(this.sprite_manager,
+			particle_manager);
 		projectile_manager =
-			new ISIS.ProjectileManager(this.sprite_manager, particle_manager);
+			new ISIS.ProjectileManager(this.sprite_manager, particle_manager,
+				pokemon_manager);
 		this.addComponent(particle_manager);
+		this.addComponent(pokemon_manager);
 		this.addComponent(projectile_manager);
 
 		// set up classes
 		Technique = POKE_technique(this.sprite_manager,
 			projectile_manager);
-		Pokemon = POKE_pokemon(this.context,
-			images,
-			this.sprite_manager,
-			particle_manager);
 		// orders objects
 		orders = POKE_order();
 
 		// main click handler
 		clickHandler = ( function (that) {
 			return function (evt) {
+				console.log(evt.button);
 				// get the mouse position
 				var mousePos = that.io.getMousePos(that.canvas, evt);
 
-				console.log("player collide: " + player.collide(mousePos));
-				console.log("enemy collide: " + enemy.collide(mousePos));
-
-				if (enemy.collide(mousePos)) {
-					player.registerOrder(new orders.Attack(player, enemy));
-				} else {
-					player.registerOrder(new orders.Move(player, mousePos));
-				}
+				player.registerOrder(new orders.Move(player, mousePos));
 
 				player.carryOut();
 				// handle based on position
 			};
 		} )(this);
 
+		// main click handler
+		rightClickHandler = ( function (that) {
+			return function (evt) {
+				console.log("right");
+				// get the mouse position
+				var mousePos = that.io.getMousePos(that.canvas, evt);
+
+				player.registerOrder(new orders.Attack(player, mousePos));
+
+				player.carryOut();
+				// handle based on position
+			};
+		} )(this);
+
+		this.canvas.oncontextmenu = function (evt) {
+			rightClickHandler(evt);
+			return false;
+		};
 
 		// Add an event listener for mouse clicks
 		this.canvas.addEventListener('click', clickHandler);
