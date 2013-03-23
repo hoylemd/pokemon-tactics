@@ -1,5 +1,5 @@
 // battle state object
-var ISIS_battleState = function () {
+var POKE_battleState = function () {
 	return function () {
 		var images = null;
 
@@ -15,6 +15,7 @@ var ISIS_battleState = function () {
 		var projectile_manager = null;
 
 		// classes
+		var Technique = null;
 		var Pokemon = null;
 
 		// Bar data
@@ -34,14 +35,16 @@ var ISIS_battleState = function () {
 
 		// function to initialize the game
 		var initialize = function() {
+
+			player = new Pokemon("metagross", {x: 1, y: 1}, 0);
+			player.moveTo({x: 300, y: 300});
+
+			enemy = new Pokemon("blastoise", {x: 1, y: 1}, 0);
+			enemy.moveTo({x: 800, y: 300});
+
 			// call base initializer
 			this.__proto__.initialize.call(this);
 		};
-
-		var drawBackground = function (context) {
-			return function () {
-			};
-		}(this.context);
 
 		// function to update the state
 		var update = function (elapsed) {
@@ -59,14 +62,13 @@ var ISIS_battleState = function () {
 				this.initialize();
 			}
 
-			// check for state changes
-
+			// draw the UI
+			this.context.reset();
+			this.context.drawImage(images["field"], 0, 0);
 
 			// call the base updater (updates all components
 			this.__proto__.update.call(this, elapsed);
 
-			// draw the UI
-			this.context.drawImage(images["field"], 0, 0);
 		};
 
 		// click handers
@@ -87,6 +89,14 @@ var ISIS_battleState = function () {
 			new ISIS.ProjectileManager(this.sprite_manager, particle_manager);
 		this.addComponent(particle_manager);
 		this.addComponent(projectile_manager);
+
+		// set up classes
+		Technique = POKE_technique(this.sprite_manager,
+			particle_manager);
+		Pokemon = POKE_pokemon(this.context,
+			images,
+			this.sprite_manager,
+			particle_manager);
 
 		// main click handler
 		clickHandler = ( function (that) {
