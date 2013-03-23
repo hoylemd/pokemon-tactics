@@ -109,4 +109,11 @@ var ISIS_Engine = function (canvas, io) {
 		this.setTransform(1, 0, 0, 1, 0, 0);
 		this.globalAlpha = 1;
 	};
+
+	canvas.boundSprite = function (sprite) {
+		return sprite.position.x < this.width &&
+		sprite.position.x > 0 &&
+		sprite.position.y < this.height &&
+		sprite.position.y > 0;
+	};
 };
