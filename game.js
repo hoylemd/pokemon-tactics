@@ -15,7 +15,7 @@ var ISIS_Engine = function (canvas, io) {
 	var image_manifest = {
 		"metagross" : {id: "metagross", path: "376.png", loaded: false},
 		"blastoise" : {id: "blastoise", path: "9.png", loaded: false},
-		"bullet" : {id: "bullet", path: "bullet.png", loaded: false},
+		"psybeam" : {id: "psybeam", path: "psybeam.png", loaded: false},
 		"field" : {id: "field", path: "field.png", loaded: false}
 	}
 
