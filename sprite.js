@@ -1,7 +1,6 @@
 // Sprite manager object
-
 function ISIS_SpriteManager (canvas) {
-	// get the context and manager prototype
+	// get the context prototype
 	var context = canvas.getContext("2d");
 
 	var rotateContext = function (that) {
@@ -152,7 +151,8 @@ function ISIS_SpriteManager (canvas) {
 				initializeSprite(this);
 
 				// link to the manager
-				this.manager = manager
+				this.manager = manager;
+
 
 				// set up the texture variables
 				this.image = image;
@@ -209,6 +209,7 @@ function ISIS_SpriteManager (canvas) {
 
 				// add to the manager
 				manager.add(this);
+				this.canvas = canvas;
 			} else {
 				// error on invalid parameters
 				console.log("invalid TextSprite parameters.");
@@ -288,5 +289,8 @@ function ISIS_SpriteManager (canvas) {
 				this.object_list[index].draw();
 			}
 		};
+
+		// link to the canvas
+		this.canvas = canvas;
 	};
 }
