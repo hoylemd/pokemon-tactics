@@ -40,9 +40,16 @@ var POKE_battleState = function () {
 			player.moveTo({x: 300, y: 300});
 			player.setHP(150);
 
-
-			player.addTechnique(new Technique("Psybeam", 50, 100, 1500,
-				images["bullet"], 15));
+			player.addTechnique(new Technique({
+				name: "Psybeam",
+				damage: 2,
+				type: "Psychic",
+				recycle: 2000,
+				texture: images["psybeam"],
+				speed: 15,
+				shots: 25,
+				shot_speed: 20,
+				range: 350 }));
 
 			enemy = new pokemon_manager.Pokemon("blastoise", {x: 1, y: 1}, 0);
 			enemy.moveTo({x: 800, y: 300});
