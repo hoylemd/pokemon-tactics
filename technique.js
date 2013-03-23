@@ -12,8 +12,7 @@ var POKE_technique = function (spriteManager, projectile_manager) {
 		// make projectile
 		sprite = new spriteManager.Sprite(texture, {x: 1, y: 1}, 0);
 		fire_point = {x: that.owner.position.x, y: that.owner.position.y};
-		new projectile_manager.Projectile(
-			sprite, fire_point, that.target, that);
+		new projectile_manager.Projectile(sprite, that.target, that);
 	};
 
 	// prototype
@@ -34,44 +33,59 @@ var POKE_technique = function (spriteManager, projectile_manager) {
 				// increase charge
 				this.current_charge += elapsed_ms;
 
-				// fire if charged
-				if (this.current_charge > this.recycle) {
-					fire(this);
-					this.current_charge = 0;
-				}
+				if (this.firing) {
+					if (this.current_charge > this.shot_speed) {
+						fire(this);
+						this.shots_to_go -= 1;
+						if (this.shots_to_go == 0) {
+							this.firing = false;
+						}
+						this.current_charge = 0;
+					}
+				} else {
+					// fire if charged
+					if (this.current_charge > this.recycle) {
+						this.firing = true;
+						this.shots_to_go = this.shots;
+						this.current_charge = 0;
+					}
 
-				// untarget if target is destroyed
-				if (this.target.destroyed) {
-					this.target = null;
+					// untarget if target is destroyed
+					if (this.target.destroyed) {
+						this.target = null;
+					}
 				}
 			}
 		}
 	};
 
 	// constructor
-	return function (name, damage, hit_bonus, recycle, proj_texture, speed) {
-		if (proj_texture) {
+	//name, damage, type, recycle, projectile texture, projectile speed, range
+	return function (params) {
+		if (params) {
 			// set the prototype
 			this.__proto__ = technique_prototype;
 
 			// set initialize the instance members
-			this.name = name;
+			this.name = params.name;
 
-			this.damage = damage;
-			this.hit_bonus = hit_bonus;
-			this.recycle = recycle;
+			this.damage = params.damage;
+			this.type = params.type;
+			this.recycle = params.recycle;
 			this.current_charge = 0;
 
-			this.proj_texture = proj_texture;
-			this.proj_speed = speed;
+			this.proj_texture = params.texture;
+			this.proj_speed = params.speed;
+			this.shots = params.shots;
+			this.shot_speed = params.shot_speed;
+			this.range = params.range;
+			this.firing = false;
 
 			this.owner = null;
-			this.projectile = null;
 
 		} else {
 			// log errors
-			console.log(
-				"Technique cannot be instantiated without a projectile texture");
+			throw "attempt to instantiate Technique without params";
 			this = null;
 		}
 	}
