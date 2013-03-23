@@ -40,7 +40,6 @@ var ISIS_Engine = function (canvas, io) {
 		ISIS.SpriteManager = ISIS_SpriteManager(canvas);
 		ISIS.ParticleManager = ISIS_ParticleManager();
 		ISIS.ProjectileManager = ISIS_ProjectileManager();
-		ISIS.FleetView = ISIS_fleetView(canvas);
 		ISIS.GameState = ISIS_gameState(this, io, canvas, content);
 		ISIS.BattleState = ISIS_battleState();
 
