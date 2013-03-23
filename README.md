@@ -1,4 +1,4 @@
-ISIS
-====
+pokemon-tactics
+===============
 
-project ISIS
+A tactical pokemon game
