@@ -1,4 +1,4 @@
-// Pokemon object (unmanaged)
+// Pokemon object
 var POKE_PokemonManager = function (canvas, content) {
 	// get the context
 	var context = canvas.getContext("2d");
@@ -127,7 +127,7 @@ var POKE_PokemonManager = function (canvas, content) {
 				} else {
 					this.technique.setTarget(null);
 				}
-				}
+			}
 		},
 
 		// damage pokemon
@@ -185,7 +185,7 @@ var POKE_PokemonManager = function (canvas, content) {
 				var distance = Math.calcDistancePoints(this.position, order.target);
 
 				// execute the movement
-				if (this.position === orders.target) {
+				if (this.position === this.orders.target) {
 					delete this.orders.move;
 				} else if (distance < this.speed) {
 					this.moveTo(order.target);
