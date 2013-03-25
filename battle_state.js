@@ -17,6 +17,7 @@ var POKE_battleState = function () {
 
 		// classes
 		var Technique = null;
+		var orders = null;
 
 		// Bar data
 		var buttonWidth = 150;
@@ -32,6 +33,19 @@ var POKE_battleState = function () {
 		var mapHeight;
 		var clientWidth;
 		var clientHeight;
+
+		var enemyAI = function (poke) {
+			return function(elapsed) {
+				if (!poke.orders.move) {
+					if (poke.position.y > 150) {
+						poke.registerOrder(new orders.Move(poke, {x:800, y:100}));
+					} else {
+						poke.registerOrder(new orders.Move(poke, {x:800, y:500}));
+					}
+				}
+			};
+		};
+
 
 		// function to initialize the game
 		var initialize = function() {
@@ -55,6 +69,7 @@ var POKE_battleState = function () {
 			enemy.moveTo({x: 800, y: 300});
 			enemy.setHP(200);
 
+
 			// add the enemy AI
 			enemy.AI = enemyAI(enemy);
 
@@ -63,19 +78,7 @@ var POKE_battleState = function () {
 		};
 
 
-		var enemyAI = function (poke) {
-			return function(elapsed) {
-				if (!poke.orders.move) {
-					if (poke.position.y > 150) {
-						poke.registerOrder(new orders.Move(poke, {x:800, y:100}));
-					} else {
-						poke.registerOrder(new orders.Move(poke, {x:800, y:500}));
-					}
-				}
-			};
-		};
-
-		// function to update the state
+			// function to update the state
 		var update = function (elapsed) {
 
 			// reset the window size
@@ -98,8 +101,12 @@ var POKE_battleState = function () {
 			// call the base updater (updates all components
 			this.__proto__.update.call(this, elapsed);
 
+			// draw order lines
+			if (!player.fainted) {
+				player.drawLines();
+			}
+
 			// draw the UI
-			player.drawLines();
 		};
 
 		// click handers
@@ -127,15 +134,14 @@ var POKE_battleState = function () {
 		this.addComponent(projectile_manager);
 
 		// set up classes
-		Technique = POKE_technique(this.sprite_manager,
-			projectile_manager);
+		Technique = POKE_technique(this.sprite_manager, projectile_manager);
+
 		// orders objects
 		orders = POKE_order();
 
 		// main click handler
 		clickHandler = ( function (that) {
 			return function (evt) {
-				console.log(evt.button);
 				// get the mouse position
 				var mousePos = that.io.getMousePos(that.canvas, evt);
 
@@ -146,10 +152,9 @@ var POKE_battleState = function () {
 			};
 		} )(this);
 
-		// main click handler
+		// main right click handler
 		rightClickHandler = ( function (that) {
 			return function (evt) {
-				console.log("right");
 				// get the mouse position
 				var mousePos = that.io.getMousePos(that.canvas, evt);
 
@@ -160,19 +165,20 @@ var POKE_battleState = function () {
 			};
 		} )(this);
 
+		// Add an event listener for mouse clicks
+		this.canvas.addEventListener('click', clickHandler);
+
 		this.canvas.oncontextmenu = function (evt) {
 			rightClickHandler(evt);
 			return false;
 		};
-
-		// Add an event listener for mouse clicks
-		this.canvas.addEventListener('click', clickHandler);
 
 		// define disposal function
 		dispose = function () {
 			projectile_manager.dispose();
 			particle_manager.dispose();
 			this.sprite_manager.dispose();
+			unit_manager.dispose();
 			this.canvas.removeEventListener('click', clickHandler);
 		};
 
